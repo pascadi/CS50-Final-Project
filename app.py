@@ -36,7 +36,37 @@ def after_request(response):
 def index():
     """homepage"""
     # This is an indendet block
-    return render_template("login.html")
+    return render_template("index.html")
+
+@app.route("/delshift", methods=["GET", "POST"])
+def delshift():
+    identifier = request.form.get("identifier")
+    if identifier:
+        db.execute("DELETE FROM shifts WHERE identifier=?", identifier)
+    shifts = db.execute("SELECT * FROM shifts WHERE id=?", session["user_id"])
+    return render_template("shifts.html", shifts = shifts)
+
+    
+
+@app.route("/shifts", methods=["GET", "POST"])
+def shifts():
+    """displays the shifts needed and allow to change them"""
+    if request.method == "POST":
+        daystart = request.form.get("daystart")
+        timestart = request.form.get("timestart")
+        dayend = request.form.get("dayend")
+        timeend = request.form.get("timeend")
+        db.execute(
+        "INSERT INTO shifts (id, daystart, timestart, dayend, timeend) VALUES(?, ?, ?, ?, ?)",
+        session["user_id"],
+        daystart,
+        timestart,
+        dayend,
+        timeend,
+        )
+
+    shifts = db.execute("SELECT * FROM shifts WHERE id=?", session["user_id"])
+    return render_template("shifts.html", shifts = shifts)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
